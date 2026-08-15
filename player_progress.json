@@ -3,6 +3,56 @@
     "username": "user1",
     "best_score": 100000,
     "games_played": 1,
+    "game_state": {
+      "active": true,
+      "my_vault": 15,
+      "my_vault_value": 750,
+      "vaults_opened": 2,
+      "opened_vaults": [
+        9,
+        10
+      ],
+      "all_values": [
+        1,
+        5,
+        10,
+        100,
+        500,
+        750,
+        1000,
+        2500,
+        5000,
+        10000,
+        25000,
+        50000,
+        75000,
+        100000
+      ],
+      "vault_contents": [
+        1000,
+        50000,
+        10000,
+        2500,
+        100000,
+        500,
+        75000,
+        100,
+        25000,
+        50,
+        250,
+        1,
+        5000,
+        10,
+        5,
+        750
+      ],
+      "status": "Now, open vaults to eliminate values."
+    }
+  },
+  "Dom": {
+    "username": "Dom",
+    "best_score": 16576,
+    "games_played": 1,
     "game_state": {}
   }
 }

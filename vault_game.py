@@ -1,8 +1,9 @@
 import json
 import os
 import random
+import sys
 import tkinter as tk
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox
 
 PROFILE_FILE = os.path.join(os.path.dirname(__file__), "player_progress.json")
 
@@ -21,6 +22,104 @@ def load_profiles():
 def save_profiles(profiles):
     with open(PROFILE_FILE, "w", encoding="utf-8") as file:
         json.dump(profiles, file, indent=2)
+
+
+def choose_player_name():
+    profiles = load_profiles()
+    existing_users = sorted(profiles.keys())
+
+    selector = tk.Tk()
+    selector.title("Choose Your Profile")
+    selector.geometry("420x420")
+    selector.configure(bg="#2b2b2b")
+    selector.resizable(False, False)
+
+    result = {"username": ""}
+
+    def finalize_selection():
+        username = name_entry.get().strip()
+        if not username and selector_listbox.curselection():
+            username = selector_listbox.get(selector_listbox.curselection()[0])
+
+        if not username:
+            messagebox.showwarning(
+                "Missing Profile",
+                "Please select an existing user or enter a new username.",
+                parent=selector,
+            )
+            return
+
+        result["username"] = username
+        selector.destroy()
+
+    def cancel_selection():
+        selector.destroy()
+
+    title_label = tk.Label(
+        selector,
+        text="Select an existing player or create a new one",
+        font=("Arial", 16, "bold"),
+        bg="#2b2b2b",
+        fg="white",
+    )
+    title_label.pack(pady=(20, 10))
+
+    selector_listbox = tk.Listbox(
+        selector,
+        width=28,
+        height=10,
+        font=("Arial", 12),
+        exportselection=False,
+    )
+    if existing_users:
+        for user in existing_users:
+            selector_listbox.insert(tk.END, user)
+    else:
+        selector_listbox.insert(tk.END, "No saved players yet")
+        selector_listbox.config(state="disabled")
+    selector_listbox.pack(pady=10)
+
+    def fill_from_selection(event=None):
+        if selector_listbox.curselection() and selector_listbox["state"] != "disabled":
+            selected_user = selector_listbox.get(selector_listbox.curselection()[0])
+            name_entry.delete(0, tk.END)
+            name_entry.insert(0, selected_user)
+
+    selector_listbox.bind("<<ListboxSelect>>", fill_from_selection)
+
+    tk.Label(
+        selector,
+        text="New username:",
+        font=("Arial", 11, "bold"),
+        bg="#2b2b2b",
+        fg="white",
+    ).pack()
+
+    name_entry = tk.Entry(selector, width=28, font=("Arial", 12))
+    name_entry.pack(pady=(0, 15))
+
+    actions = tk.Frame(selector, bg="#2b2b2b")
+    actions.pack()
+    tk.Button(
+        actions,
+        text="Start Game",
+        width=14,
+        height=2,
+        font=("Arial", 11, "bold"),
+        command=finalize_selection,
+    ).pack(side=tk.LEFT, padx=8)
+    tk.Button(
+        actions,
+        text="Exit",
+        width=10,
+        height=2,
+        font=("Arial", 11, "bold"),
+        command=cancel_selection,
+    ).pack(side=tk.LEFT, padx=8)
+
+    selector.protocol("WM_DELETE_WINDOW", cancel_selection)
+    selector.mainloop()
+    return result["username"]
 
 
 class VaultDilemma:
@@ -202,16 +301,13 @@ class VaultDilemma:
 
 
 if __name__ == "__main__":
-    login_root = tk.Tk()
-    login_root.withdraw()
-    username = simpledialog.askstring(
-        "Player Account",
-        "Enter your username to load or create your saved progress:",
-        parent=login_root,
-    )
-    login_root.destroy()
+    try:
+        player_name = choose_player_name()
+    except SystemExit:
+        sys.exit()
 
-    player_name = username.strip() if username else "Player"
+    if not player_name:
+        sys.exit()
 
     window = tk.Tk()
     game = VaultDilemma(window, player_name)
